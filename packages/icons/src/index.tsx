@@ -9,7 +9,7 @@ export type WgdIconProps = {
 
 const paths = {
   why: <><path d="M8 7.5a4 4 0 0 1 8 0c0 2.7-4 2.8-4 5"/><circle cx="12" cy="17.5" r="1.2" fill="currentColor" stroke="none"/></>,
-  evidence: <><path d="M8 7h10M8 12h10M8 17h7"/><path d="m4 7 1 1 2-2m-3 6 1 1 2-2m-3 6 1 1 2-2"/></>,
+  evidence: <><rect x="5.25" y="4.75" width="13.5" height="14.5" rx="2"/><path d="m8 10 1.5 1.5L12.5 8.5M14.5 9h2.25M14.5 12.5h2.25M8 15.75h8.75"/></>,
   compare: <path d="M5 8h13m-3-3 3 3-3 3M19 16H6m3-3-3 3 3 3"/>,
   challenge: <path d="M5 8h14M8 8l-3 6h6L8 8zm8 0-3 6h6l-3-6zM12 4v16"/>,
   confidence: <><path d="M5 17a7 7 0 0 1 14 0M12 12l4-3"/><circle cx="12" cy="17" r="1.2" fill="currentColor" stroke="none"/></>,
