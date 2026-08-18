@@ -1,6 +1,6 @@
 {
   "name": "@wgd-ai/core",
-  "version": "0.12.0-alpha.2",
+  "version": "0.12.0-alpha.3",
   "description": "Provider-neutral reasoning contracts and runtime for WGD.ai",
   "license": "MIT",
   "type": "module",
