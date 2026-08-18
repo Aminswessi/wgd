@@ -43,10 +43,10 @@ Public demo: `https://wgd-dev-alpha.vercel.app`
 
 ## Repository layout
 
-- `index.html` — canonical demo / marketing page
 - `wgd.js` — vanilla embed runtime
 - `wgd.css` — embed styles
 - `api/wgd.js` — deterministic public demo gateway
+- `examples/basic.html` — copy-paste integration example
 - `vercel.json` — Vercel deployment configuration
 
 ## Design principle
@@ -57,4 +57,4 @@ The public demo gateway is deterministic and uses only explicit supplied context
 
 ## License
 
-License is not yet declared. Do not treat this alpha repository as an open-source release until a license is added.
+MIT License. See `LICENSE`.
