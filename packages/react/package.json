@@ -1,0 +1,18 @@
+{
+  "name": "@wgd/react",
+  "version": "0.12.0-alpha.1",
+  "description": "React reasoning affordances for WGD.ai",
+  "license": "MIT",
+  "type": "module",
+  "peerDependencies": {"react": ">=18", "react-dom": ">=18"},
+  "dependencies": {"@wgd/core":"0.12.0-alpha.1","@wgd/icons":"0.12.0-alpha.1"},
+  "exports": {".": {"types":"./dist/index.d.ts","import":"./dist/index.js"}},
+  "files": ["dist","README.md","LICENSE"],
+  "publishConfig": {"access":"public"},
+  "repository": {"type":"git","url":"git+https://github.com/Aminswessi/wgd.git","directory":"packages/react"},
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {"@types/react":"^19.0.0","@types/react-dom":"^19.0.0","typescript":"^5.9.0"}
+}

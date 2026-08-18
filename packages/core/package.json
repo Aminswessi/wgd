@@ -1,0 +1,20 @@
+{
+  "name": "@wgd/core",
+  "version": "0.12.0-alpha.1",
+  "description": "Provider-neutral reasoning contracts and runtime for WGD.ai",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": ["./dist/style.css"],
+  "exports": {
+    ".": {"types":"./dist/index.d.ts","import":"./dist/index.js"},
+    "./style.css": "./dist/style.css"
+  },
+  "files": ["dist","README.md","LICENSE"],
+  "publishConfig": {"access":"public"},
+  "repository": {"type":"git","url":"git+https://github.com/Aminswessi/wgd.git","directory":"packages/core"},
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cp src/style.css dist/style.css",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {"typescript":"^5.9.0"}
+}
