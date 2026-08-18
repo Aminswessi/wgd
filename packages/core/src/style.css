@@ -1,0 +1,14 @@
+:root {
+  --wgd-ai-a: #4285f4;
+  --wgd-ai-b: #8b5cf6;
+  --wgd-fg: #4f5459;
+  --wgd-surface: #fff;
+  --wgd-border: #dadce0;
+  --wgd-radius: 5px;
+  --wgd-shadow: 0 8px 24px rgba(60,64,67,.18);
+}
+.wgd-trigger{width:44px;height:44px;min-width:44px;border:0;border-radius:var(--wgd-radius);background:transparent;position:relative;display:inline-grid;place-items:center;padding:0;cursor:pointer}
+.wgd-trigger:hover{background:linear-gradient(135deg,rgba(66,133,244,.06),rgba(139,92,246,.06))}
+.wgd-trigger:focus-visible{outline:3px solid rgba(66,133,244,.18);outline-offset:2px}
+.wgd-popover{position:fixed;z-index:2147483646;width:min(420px,calc(100vw - 24px));max-height:60vh;overflow:auto;background:var(--wgd-surface);color:#202124;border:1px solid var(--wgd-border);border-radius:var(--wgd-radius);box-shadow:var(--wgd-shadow);padding:14px}
+@media(prefers-reduced-motion:reduce){.wgd-trigger{transition:none}}
