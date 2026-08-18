@@ -10,22 +10,26 @@ export const WGD_INTENTS = [
 export type WgdIntent = (typeof WGD_INTENTS)[number];
 export type WgdContext = Record<string, unknown>;
 
-export type WgdItem = {
-  title: string;
+export type WgdReason = {
+  label: string;
   detail: string;
 };
 
 export type WgdResponse = {
+  version: "1";
+  requestId: string;
+  intent: WgdIntent;
+  status: "ok" | "insufficient_context" | "unsupported" | "unknown";
   title: string;
-  heading?: string;
-  items: WgdItem[];
+  reasons: WgdReason[];
+  caveats?: string[];
 };
 
 export type WgdRequest = {
-  version: string;
+  version: "1";
+  requestId: string;
   intent: WgdIntent;
-  id?: string;
-  label?: string;
+  subject?: { id?: string; type?: string; label?: string };
   context: WgdContext;
 };
 
@@ -48,30 +52,23 @@ export async function resolveWgd(
   signal?: AbortSignal,
 ): Promise<WgdResponse> {
   if (config.resolver) return config.resolver(request, signal);
-
   if (config.endpoint) {
     const response = await fetch(config.endpoint, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        ...(config.headers ?? {}),
-      },
+      headers: {"content-type":"application/json", ...(config.headers ?? {})},
       body: JSON.stringify(request),
       signal,
       credentials: "same-origin",
     });
-
-    if (!response.ok) {
-      throw new Error(`WGD endpoint returned ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`WGD endpoint returned ${response.status}`);
     return response.json() as Promise<WgdResponse>;
   }
-
   return {
-    title: request.label ?? request.intent,
-    items: [{
-      title: "WGD installed",
-      detail: "No resolver or endpoint is configured. Nothing was transmitted.",
-    }],
+    version:"1",
+    requestId:request.requestId,
+    intent:request.intent,
+    status:"insufficient_context",
+    title:request.subject?.label ?? request.intent,
+    reasons:[{label:"WGD installed",detail:"No resolver or endpoint is configured. Nothing was transmitted."}],
   };
 }
