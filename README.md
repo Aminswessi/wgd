@@ -2,49 +2,109 @@
 
 **Give the web new verbs.**
 
-WGD is an open interaction layer for AI-native interfaces. It adds small reasoning affordances to existing interface objects without replacing the host product, CTA, model, or backend.
+WGD adds small reasoning affordances to existing UI: **Why, Evidence, Compare, Challenge, Confidence, and Provenance.** Keep your product, model, and backend. Add a reasoning interface.
 
-Current primitives:
+> Current release: `0.12.0-alpha.2`
 
-- **Why** — expose why something appeared, changed, or was recommended
-- **Evidence** — reveal supporting facts, sources, and gaps
-- **Compare** — surface alternatives and tradeoffs
-- **Challenge** — generate the strongest countercase
-- **Confidence** — separate knowns, inference, and uncertainty
-- **Provenance** — expose origin, inputs, and transformations
+## Try it in 5 minutes
 
-## Install
+### React
 
-React:
+Install the current alpha:
 
 ```bash
-npm install @wgd-ai/react
+npm install @wgd-ai/react@alpha
 ```
 
-Core runtime only:
+Import the component and styles:
 
-```bash
-npm install @wgd-ai/core
+```tsx
+import { Wgd } from "@wgd-ai/react";
+import "@wgd-ai/core/style.css";
+
+const config = {
+  resolver: async (request) => ({
+    version: "1",
+    requestId: request.requestId,
+    intent: request.intent,
+    status: "ok",
+    title: "Show the evidence",
+    reasons: [
+      {
+        label: "support",
+        detail: "Your host application supplied this evidence."
+      }
+    ]
+  })
+};
+
+export function PriceClaim() {
+  return (
+    <Wgd
+      intent="evidence"
+      label="Show the evidence"
+      context={{ claim: "Lowest price in 60 days" }}
+      config={config}
+    >
+      <strong>Lowest price in 60 days</strong>
+    </Wgd>
+  );
+}
 ```
 
-Icons only:
+That is a complete local integration. No API key is required and nothing is transmitted unless you configure a resolver or endpoint.
 
-```bash
-npm install @wgd-ai/icons
+**Live external install proof:** https://wgd-react-install-proof.vercel.app
+
+### Connect it to your AI/backend
+
+Replace the local resolver with your server endpoint:
+
+```tsx
+const config = {
+  endpoint: "/api/wgd"
+};
 ```
 
-## Vanilla embed
+WGD sends a small structured request containing the intent, subject, and **explicit context you provide**. Your server can route that request to OpenAI, Anthropic, Gemini, an internal model, deterministic business logic, or any other reasoning system.
+
+```json
+{
+  "version": "1",
+  "requestId": "...",
+  "intent": "evidence",
+  "subject": { "label": "Show the evidence" },
+  "context": { "claim": "Lowest price in 60 days" }
+}
+```
+
+Your endpoint returns:
+
+```json
+{
+  "version": "1",
+  "requestId": "...",
+  "intent": "evidence",
+  "status": "ok",
+  "title": "Show the evidence",
+  "reasons": [
+    { "label": "support", "detail": "Observed price history supports the claim." }
+  ]
+}
+```
+
+## Vanilla HTML
+
+No React required:
 
 ```html
 <script>
-  window.WGD_CONFIG = { endpoint: "https://wgd-dev-alpha.vercel.app/api/wgd" };
+  window.WGD_CONFIG = {
+    endpoint: "https://wgd-dev-alpha.vercel.app/api/wgd"
+  };
 </script>
 <script src="https://wgd-dev-alpha.vercel.app/wgd.js" defer></script>
-```
 
-Then attach intent to an existing object:
-
-```html
 <span
   data-wgd="evidence"
   data-wgd-label="Show the evidence"
@@ -53,31 +113,51 @@ Then attach intent to an existing object:
 </span>
 ```
 
-WGD does not scrape arbitrary DOM or require a browser-side AI key. Hosts explicitly provide context and can route requests to their own reasoning endpoint.
+See `examples/basic.html` for the complete copy-paste example.
 
-## Current status
+## The six primitives
 
-`0.12 alpha` — interface and integration contract under active development.
+| Primitive | Use it when someone needs to… |
+|---|---|
+| **Why** | understand why something appeared, changed, or was recommended |
+| **Evidence** | inspect supporting facts, sources, and gaps |
+| **Compare** | evaluate alternatives and tradeoffs |
+| **Challenge** | see the strongest reasonable countercase |
+| **Confidence** | distinguish certainty, inference, and unknowns |
+| **Provenance** | inspect origin, inputs, and transformations |
 
-Public demo: `https://wgd-dev-alpha.vercel.app`
+## One rule
 
-## Repository layout
+**WGD should not invent an explanation for a system that cannot support it.** Hosts supply the context. WGD supplies the interaction contract and interface.
 
-- `packages/core` — provider-neutral reasoning contracts and runtime
-- `packages/react` — React components
-- `packages/icons` — self-contained React icons
-- `wgd.js` — vanilla embed runtime
-- `wgd.css` — embed styles
-- `api/wgd.js` — deterministic public demo gateway
-- `examples/basic.html` — copy-paste integration example
-- `vercel.json` — Vercel deployment configuration
+WGD does not scrape arbitrary DOM, does not require a browser-side model key, and ships no telemetry by default.
 
-## Design principle
+## Packages
 
-> Keep your model. Keep your backend. Add a reasoning interface.
+```bash
+npm install @wgd-ai/react@alpha
+npm install @wgd-ai/core@alpha
+npm install @wgd-ai/icons@alpha
+```
 
-The public demo gateway is deterministic and uses only explicit supplied context. Production adopters should connect WGD to their own server-side model or internal AI gateway.
+- `@wgd-ai/core` — provider-neutral contracts and resolver runtime
+- `@wgd-ai/react` — React reasoning affordances
+- `@wgd-ai/icons` — self-contained React icons
+
+## Examples and source
+
+- `examples/react-install-proof` — fresh Vite app consuming WGD from npm
+- `examples/basic.html` — vanilla copy-paste integration
+- `packages/core` — request/response contract and runtime
+- `packages/react` — React component
+- `packages/icons` — icon package
+
+Public demo: https://wgd-dev-alpha.vercel.app
+
+## Status
+
+`0.12 alpha` — the interaction and integration contract is intentionally small and still being hardened through real integrations.
 
 ## License
 
-MIT License. See `LICENSE`.
+MIT. See `LICENSE`.
