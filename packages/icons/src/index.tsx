@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useId, type CSSProperties, type ReactNode } from "react";
 
 export type WgdIconProps = {
   size?: number;
@@ -18,11 +18,13 @@ const paths = {
 
 function WgdIcon({kind,size=24,title,className,style}:{kind:keyof typeof paths}&WgdIconProps){
   const labelled = title ? {role:"img","aria-label":title} : {"aria-hidden":true as const};
+  const gradientId = `wgd-ai-${kind}-${useId().replace(/:/g, "")}`;
   return <span {...labelled} className={className} style={{width:size+12,height:size+12,position:"relative",display:"inline-grid",placeItems:"center",...style}}>
     <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" style={{color:"#4f5459"}}>{paths[kind]}</svg>
-    <svg aria-hidden="true" viewBox="0 0 12 12" width="12" height="12" style={{position:"absolute",left:0,top:0}}>
-      <defs><linearGradient id={`wgd-ai-${kind}`} x1="1" y1="1" x2="10" y2="10" gradientUnits="userSpaceOnUse"><stop stopColor="#4285F4"/><stop offset="1" stopColor="#8B5CF6"/></linearGradient></defs>
-      <path d="M4.5 1C4.8 3.1 5.7 4 7.8 4.3C5.7 4.6 4.8 5.5 4.5 7.6C4.2 5.5 3.3 4.6 1.2 4.3C3.3 4 4.2 3.1 4.5 1Z" fill={`url(#wgd-ai-${kind})`}/><circle cx="9.1" cy="2" r="1" fill="#8B5CF6"/>
+    <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" style={{position:"absolute",left:-1,top:-1,overflow:"visible"}}>
+      <defs><linearGradient id={gradientId} x1="1" y1="1" x2="13" y2="13" gradientUnits="userSpaceOnUse"><stop stopColor="#4285F4"/><stop offset="1" stopColor="#8B5CF6"/></linearGradient></defs>
+      <path d="M5.2.8c.34 2.55 1.42 3.63 3.97 3.97C6.62 5.11 5.54 6.19 5.2 8.74 4.86 6.19 3.78 5.11 1.23 4.77 3.78 4.43 4.86 3.35 5.2.8Z" fill={`url(#${gradientId})`}/>
+      <path d="M12.05.95c.17 1.3.72 1.85 2.02 2.02-1.3.17-1.85.72-2.02 2.02-.17-1.3-.72-1.85-2.02-2.02 1.3-.17 1.85-.72 2.02-2.02Z" fill="#8B5CF6"/>
     </svg>
   </span>;
 }
