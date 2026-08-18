@@ -1,0 +1,42 @@
+name: Publish npm packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: npm dist-tag to publish under
+        required: true
+        default: alpha
+        type: choice
+        options:
+          - alpha
+          - latest
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run typecheck
+
+      - name: Publish core
+        run: npm publish --workspace @wgd-ai/core --tag "${{ inputs.tag }}" --access public
+
+      - name: Publish icons
+        run: npm publish --workspace @wgd-ai/icons --tag "${{ inputs.tag }}" --access public
+
+      - name: Publish react
+        run: npm publish --workspace @wgd-ai/react --tag "${{ inputs.tag }}" --access public
