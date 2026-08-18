@@ -44,7 +44,7 @@ export type WgdConfig = {
   headers?: Record<string, string>;
 };
 
-export const WGD_VERSION = "0.12.0-alpha.2";
+export const WGD_VERSION = "0.12.0-alpha.1";
 
 export async function resolveWgd(
   request: WgdRequest,
