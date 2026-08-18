@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WGD basic example</title>
+  <style>
+    body{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:80px auto;padding:0 20px;color:#202124}
+    .claim{display:inline-flex;align-items:center;gap:4px;padding:18px;border:1px solid #dadce0;border-radius:5px}
+  </style>
+  <script>
+    window.WGD_CONFIG={endpoint:"https://wgd-dev-alpha.vercel.app/api/wgd"};
+  </script>
+  <script src="https://wgd-dev-alpha.vercel.app/wgd.js" defer></script>
+</head>
+<body>
+  <h1>WGD evidence primitive</h1>
+  <p>The host supplies explicit context. WGD supplies the reasoning affordance.</p>
+
+  <div class="claim">
+    <span
+      data-wgd="evidence"
+      data-wgd-label="Show the evidence"
+      data-wgd-context='{"claim":"Lowest price in 60 days","facts":{"currentPrice":135.75,"observedRange":[141,168],"marketplacesIncluded":false}}'>
+      Lowest price in the last 60 days: $135.75
+    </span>
+  </div>
+</body>
+</html>

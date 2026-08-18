@@ -1,0 +1,23 @@
+{
+  "functions": {
+    "api/wgd.js": {
+      "maxDuration": 15
+    }
+  },
+  "headers": [
+    {
+      "source": "/wgd.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    },
+    {
+      "source": "/wgd.css",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    }
+  ]
+}
