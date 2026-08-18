@@ -13,6 +13,26 @@ Current primitives:
 - **Confidence** — separate knowns, inference, and uncertainty
 - **Provenance** — expose origin, inputs, and transformations
 
+## Install
+
+React:
+
+```bash
+npm install @wgd-ai/react
+```
+
+Core runtime only:
+
+```bash
+npm install @wgd-ai/core
+```
+
+Icons only:
+
+```bash
+npm install @wgd-ai/icons
+```
+
 ## Vanilla embed
 
 ```html
@@ -43,6 +63,9 @@ Public demo: `https://wgd-dev-alpha.vercel.app`
 
 ## Repository layout
 
+- `packages/core` — provider-neutral reasoning contracts and runtime
+- `packages/react` — React components
+- `packages/icons` — self-contained React icons
 - `wgd.js` — vanilla embed runtime
 - `wgd.css` — embed styles
 - `api/wgd.js` — deterministic public demo gateway
