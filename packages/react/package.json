@@ -1,11 +1,11 @@
 {
-  "name": "@wgd/react",
+  "name": "@wgd-ai/react",
   "version": "0.12.0-alpha.1",
   "description": "React reasoning affordances for WGD.ai",
   "license": "MIT",
   "type": "module",
   "peerDependencies": {"react": ">=18", "react-dom": ">=18"},
-  "dependencies": {"@wgd/core":"0.12.0-alpha.1","@wgd/icons":"0.12.0-alpha.1"},
+  "dependencies": {"@wgd-ai/core":"0.12.0-alpha.1","@wgd-ai/icons":"0.12.0-alpha.1"},
   "exports": {".": {"types":"./dist/index.d.ts","import":"./dist/index.js"}},
   "files": ["dist","README.md","LICENSE"],
   "publishConfig": {"access":"public"},
