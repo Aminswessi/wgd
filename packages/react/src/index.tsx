@@ -1,6 +1,6 @@
 import {type CSSProperties,type ReactNode,useEffect,useRef,useState} from "react";
-import {resolveWgd,type WgdConfig,type WgdContext,type WgdIntent,type WgdResponse} from "@wgd/core";
-import {WhyIcon,EvidenceIcon,CompareIcon,ChallengeIcon,ConfidenceIcon,ProvenanceIcon} from "@wgd/icons";
+import {resolveWgd,type WgdConfig,type WgdContext,type WgdIntent,type WgdResponse} from "@wgd-ai/core";
+import {WhyIcon,EvidenceIcon,CompareIcon,ChallengeIcon,ConfidenceIcon,ProvenanceIcon} from "@wgd-ai/icons";
 
 const ICONS={why:WhyIcon,evidence:EvidenceIcon,compare:CompareIcon,challenge:ChallengeIcon,confidence:ConfidenceIcon,provenance:ProvenanceIcon};
 
@@ -29,4 +29,4 @@ export function Wgd({intent,context,children,label,id,config={},className,style,
 }
 
 export {WhyIcon,EvidenceIcon,CompareIcon,ChallengeIcon,ConfidenceIcon,ProvenanceIcon};
-export type {WgdIntent,WgdContext,WgdResponse,WgdConfig} from "@wgd/core";
+export type {WgdIntent,WgdContext,WgdResponse,WgdConfig} from "@wgd-ai/core";
