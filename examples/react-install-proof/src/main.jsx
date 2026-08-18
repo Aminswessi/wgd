@@ -18,7 +18,7 @@ const config = {
       },
       {
         label: "package",
-        detail: "@wgd-ai/react@0.12.0-alpha.1"
+        detail: "@wgd-ai/react@0.12.0-alpha.2"
       }
     ]
   })
