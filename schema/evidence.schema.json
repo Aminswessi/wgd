@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/evidence.schema.json",
+  "title": "WGD Evidence Data",
+  "type": "object",
+  "required": ["items", "gaps", "contradictions"],
+  "additionalProperties": false,
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "claim", "source", "strength", "direction"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string"},
+          "claim": {"type": "string"},
+          "source": {"type": "string"},
+          "strength": {"enum": ["direct", "strong", "moderate", "weak", "unknown"]},
+          "direction": {"enum": ["supports", "contradicts", "neutral"]}
+        }
+      }
+    },
+    "gaps": {"type": "array", "items": {"type": "string"}},
+    "contradictions": {"type": "array", "items": {"type": "string"}}
+  }
+}
