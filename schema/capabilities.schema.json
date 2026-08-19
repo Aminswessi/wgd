@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/capabilities.schema.json",
+  "title": "WGD Protocol v0.1 Capability Manifest",
+  "type": "object",
+  "required": ["wgdVersion", "resolver", "intents"],
+  "additionalProperties": false,
+  "properties": {
+    "wgdVersion": {"const": "0.1"},
+    "resolver": {"type": "string", "minLength": 1},
+    "intents": {
+      "type": "object",
+      "required": ["why", "evidence", "compare", "challenge", "confidence", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "why": {"$ref": "#/$defs/basicCapability"},
+        "evidence": {
+          "allOf": [
+            {"$ref": "#/$defs/basicCapability"},
+            {"type": "object", "properties": {"sourceBacked": {"type": "boolean"}}}
+          ]
+        },
+        "compare": {"$ref": "#/$defs/basicCapability"},
+        "challenge": {"$ref": "#/$defs/basicCapability"},
+        "confidence": {
+          "type": "object",
+          "required": ["supported"],
+          "additionalProperties": false,
+          "properties": {
+            "supported": {"type": "boolean"},
+            "modes": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"enum": ["empirical_calibration", "prediction_interval", "model_reported", "evidence_strength", "model_disagreement", "qualitative_uncertainty", "unknown"]}
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "required": ["supported"],
+          "additionalProperties": false,
+          "properties": {
+            "supported": {"type": "boolean"},
+            "depth": {"type": "string"}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "basicCapability": {
+      "type": "object",
+      "required": ["supported"],
+      "additionalProperties": false,
+      "properties": {"supported": {"type": "boolean"}}
+    }
+  }
+}
