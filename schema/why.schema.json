@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/why.schema.json",
+  "title": "WGD Why data",
+  "type": "object",
+  "required": ["reasons", "basis", "unknowns"],
+  "additionalProperties": true,
+  "properties": {
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "detail", "basis"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {"type": "string"},
+          "detail": {"type": "string"},
+          "basis": {"enum": ["observed", "supplied", "inferred"]}
+        }
+      }
+    },
+    "basis": {"enum": ["observed", "supplied", "inferred", "unknown"]},
+    "unknowns": {"type": "array", "items": {"type": "string"}}
+  }
+}
