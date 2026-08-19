@@ -19,6 +19,14 @@
         "level": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
       }
     },
+    "knowns": {"type": "array", "items": {"type": "string"}},
+    "unknowns": {"type": "array", "items": {"type": "string"}},
     "limitations": {"type": "array", "items": {"type": "string"}}
-  }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"kind": {"const": "empirical_calibration"}}, "required": ["kind"]},
+      "then": {"required": ["value", "basis"], "properties": {"basis": {"type": "string", "minLength": 1}}}
+    }
+  ]
 }
