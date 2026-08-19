@@ -1,0 +1,28 @@
+{
+  "subject": {
+    "id": "acct-acme-204",
+    "type": "decision",
+    "label": "Escalate Acme for manual review"
+  },
+  "facts": {
+    "riskBand": "medium",
+    "usageChange30d": -0.19,
+    "billingChanged": true,
+    "supportSentiment": "healthy",
+    "cancellationRequested": false,
+    "renewalEmailAnswered": false
+  },
+  "sources": [
+    {"id": "usage-warehouse", "recorded": true},
+    {"id": "billing-system", "recorded": true},
+    {"id": "support-crm", "recorded": true}
+  ],
+  "expectedIntentBehavior": {
+    "why": "Explain which supplied signals caused or contributed to the review recommendation, and label any inferred explanation.",
+    "evidence": "Return source-addressable supporting and contradictory observations plus evidence gaps.",
+    "compare": "Compare escalate-now against wait-and-recheck using supplied decision criteria.",
+    "challenge": "Construct the strongest reasonable case against escalation and identify what would strengthen that countercase.",
+    "confidence": "Describe uncertainty type and basis; do not invent a calibrated percentage.",
+    "provenance": "Trace recorded data sources and transformations to the decision output; mark unrecorded segments unknown."
+  }
+}
