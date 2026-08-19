@@ -1,27 +1,44 @@
-name: CI
+name: WGD CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   verify:
+    name: Build and protocol checks
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          package-manager-cache: false
-      - run: npm install
-      - run: npm run build
-      - run: npm run typecheck
-      - name: Validate JSON schemas parse
-        run: node -e "for (const f of require('fs').readdirSync('schema')) if (f.endsWith('.json')) JSON.parse(require('fs').readFileSync('schema/'+f,'utf8')); console.log('schemas: parse PASS')"
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Validate schemas
+        run: node scripts/validate-schemas.mjs
+
       - name: Protocol smoke test
         run: node scripts/protocol-smoke.mjs
