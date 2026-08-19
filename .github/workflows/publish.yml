@@ -11,17 +11,10 @@ on:
         options:
           - alpha
           - latest
-  push:
-    branches: [main]
-    paths:
-      - .release/alpha3
 
 permissions:
   id-token: write
   contents: read
-
-env:
-  NPM_TAG: ${{ inputs.tag || 'alpha' }}
 
 jobs:
   publish:
@@ -40,13 +33,10 @@ jobs:
       - run: npm run typecheck
 
       - name: Publish core
-        run: npm publish --workspace @wgd-ai/core --tag "$NPM_TAG" --access public
+        run: npm publish --workspace @wgd-ai/core --tag "${{ inputs.tag }}" --access public
 
       - name: Publish icons
-        run: npm publish --workspace @wgd-ai/icons --tag "$NPM_TAG" --access public
+        run: npm publish --workspace @wgd-ai/icons --tag "${{ inputs.tag }}" --access public
 
       - name: Publish react
-        run: npm publish --workspace @wgd-ai/react --tag "$NPM_TAG" --access public
-
-      - name: Publish conformance
-        run: npm publish --workspace @wgd-ai/conformance --tag "$NPM_TAG" --access public
+        run: npm publish --workspace @wgd-ai/react --tag "${{ inputs.tag }}" --access public
