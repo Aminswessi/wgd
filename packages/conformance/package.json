@@ -1,0 +1,15 @@
+{
+  "name": "@wgd-ai/conformance",
+  "version": "0.1.0-alpha.1",
+  "description": "Conformance checks for WGD Protocol v0.1 resolvers",
+  "license": "MIT",
+  "type": "module",
+  "bin": {"wgd-conformance": "./cli.mjs"},
+  "files": ["cli.mjs", "README.md", "LICENSE"],
+  "publishConfig": {"access": "public"},
+  "repository": {"type":"git","url":"git+https://github.com/Aminswessi/wgd.git","directory":"packages/conformance"},
+  "scripts": {
+    "build": "node --check cli.mjs",
+    "typecheck": "node --check cli.mjs"
+  }
+}
