@@ -4,7 +4,7 @@
   "description": "Conformance checks for WGD Protocol v0.1 resolvers",
   "license": "MIT",
   "type": "module",
-  "bin": {"wgd-conformance": "./cli.mjs"},
+  "bin": {"wgd-conformance": "cli.mjs"},
   "files": ["cli.mjs", "README.md", "LICENSE"],
   "publishConfig": {"access": "public"},
   "repository": {"type":"git","url":"git+https://github.com/Aminswessi/wgd.git","directory":"packages/conformance"},
