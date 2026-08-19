@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/challenge.schema.json",
+  "title": "WGD Challenge data",
+  "type": "object",
+  "required": ["countercase", "arguments", "strengtheners", "weaknesses"],
+  "additionalProperties": true,
+  "properties": {
+    "countercase": {"type": ["string", "null"]},
+    "arguments": {"type": "array", "items": {"type": "string"}},
+    "strengtheners": {"type": "array", "items": {"type": "string"}},
+    "weaknesses": {"type": "array", "items": {"type": "string"}}
+  }
+}
