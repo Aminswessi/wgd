@@ -5,8 +5,12 @@
   "license": "MIT",
   "type": "module",
   "peerDependencies": {"react": ">=18"},
-  "exports": {".": {"types":"./dist/index.d.ts","import":"./dist/index.js"}},
-  "files": ["dist","README.md","LICENSE"],
+  "exports": {
+    ".": {"types":"./dist/index.d.ts","import":"./dist/index.js"},
+    "./browser": "./browser.js",
+    "./definitions": "./icons.json"
+  },
+  "files": ["dist","browser.js","icons.json","README.md","LICENSE"],
   "publishConfig": {"access":"public"},
   "repository": {"type":"git","url":"git+https://github.com/Aminswessi/wgd.git","directory":"packages/icons"},
   "scripts": {
