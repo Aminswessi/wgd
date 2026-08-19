@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/compare.schema.json",
+  "title": "WGD Compare data",
+  "type": "object",
+  "required": ["options", "dimensions", "tradeoffs", "missing"],
+  "additionalProperties": true,
+  "properties": {
+    "options": {"type": "array", "items": {"type": "object"}},
+    "dimensions": {"type": "array", "items": {}},
+    "tradeoffs": {"type": "array", "items": {}},
+    "missing": {"type": "array", "items": {"type": "string"}}
+  }
+}
