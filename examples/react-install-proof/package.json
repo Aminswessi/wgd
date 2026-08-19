@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@wgd-ai/core": "0.12.0-alpha.2",
-    "@wgd-ai/react": "0.12.0-alpha.2",
+    "@wgd-ai/core": "0.12.0-alpha.3",
+    "@wgd-ai/react": "0.12.0-alpha.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
