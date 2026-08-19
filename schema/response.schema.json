@@ -14,5 +14,35 @@
     "summary": {"type": "string", "maxLength": 10000},
     "data": {"type": "object"},
     "caveats": {"type": "array", "items": {"type": "string"}}
-  }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "error"}}, "required": ["status"]},
+      "then": {"properties": {"data": {"$ref": "./error.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"intent": {"const": "why"}, "status": {"enum": ["ok", "partial", "insufficient_context", "unknown"]}}, "required": ["intent", "status"]},
+      "then": {"properties": {"data": {"$ref": "./why.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"intent": {"const": "evidence"}, "status": {"enum": ["ok", "partial", "insufficient_context", "unknown"]}}, "required": ["intent", "status"]},
+      "then": {"properties": {"data": {"$ref": "./evidence.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"intent": {"const": "compare"}, "status": {"enum": ["ok", "partial", "insufficient_context", "unknown"]}}, "required": ["intent", "status"]},
+      "then": {"properties": {"data": {"$ref": "./compare.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"intent": {"const": "challenge"}, "status": {"enum": ["ok", "partial", "insufficient_context", "unknown"]}}, "required": ["intent", "status"]},
+      "then": {"properties": {"data": {"$ref": "./challenge.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"intent": {"const": "confidence"}, "status": {"enum": ["ok", "partial", "insufficient_context", "unknown"]}}, "required": ["intent", "status"]},
+      "then": {"properties": {"data": {"$ref": "./confidence.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"intent": {"const": "provenance"}, "status": {"enum": ["ok", "partial", "insufficient_context", "unknown"]}}, "required": ["intent", "status"]},
+      "then": {"properties": {"data": {"$ref": "./provenance.schema.json"}}}
+    }
+  ]
 }
