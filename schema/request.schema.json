@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/request.schema.json",
+  "title": "WGD Protocol v0.1 Request",
+  "type": "object",
+  "required": ["version", "requestId", "intent", "subject", "context"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": "0.1"},
+    "requestId": {"type": "string", "minLength": 1, "maxLength": 256},
+    "intent": {
+      "enum": ["why", "evidence", "compare", "challenge", "confidence", "provenance"]
+    },
+    "subject": {
+      "type": "object",
+      "required": ["id", "type", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "type": {"type": "string", "minLength": 1, "maxLength": 128},
+        "label": {"type": "string", "minLength": 1, "maxLength": 1024}
+      }
+    },
+    "context": {"type": "object"},
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allowedSources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "allowExternalLookup": {"type": "boolean", "default": false}
+      }
+    }
+  }
+}
