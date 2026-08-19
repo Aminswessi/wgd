@@ -9,8 +9,18 @@ if (!endpoint) {
 const VERSION = "0.1";
 const intents = ["why","evidence","compare","challenge","confidence","provenance"];
 const statuses = new Set(["ok","partial","insufficient_context","unsupported","unknown","error"]);
+const confidenceKinds = new Set(["empirical_calibration","prediction_interval","model_reported","evidence_strength","model_disagreement","qualitative_uncertainty","unknown"]);
 let passed = 0;
 let failed = 0;
+
+const fixtures = {
+  why: {facts:{dimensionsFit:true,price:428,budget:500},signals:["linen","oak"]},
+  evidence: {facts:{observedRange:[141,168],currentPrice:135.75,marketplacesIncluded:false}},
+  compare: {options:[{name:"A",price:286},{name:"B",price:244}],criteria:["price","distance"]},
+  challenge: {facts:{supportSentiment:"healthy",cancellationRequest:false}},
+  confidence: {calibration:{confidence:0.74,basis:"180 historical predictions"}},
+  provenance: {origin:"host-recorded-source",inputs:["catalog-record","room-dimensions"],unknowns:["lighting transform"]}
+};
 
 function ok(label) { passed++; console.log(`✓ ${label}`); }
 function fail(label, detail) { failed++; console.log(`✗ ${label}${detail ? ` — ${detail}` : ""}`); }
@@ -59,8 +69,8 @@ for (const intent of intents) {
     requestId: `conformance-${intent}-${Date.now()}`,
     intent,
     subject: {id:"conformance-object",type:"claim",label:"Conformance object"},
-    context: {},
-    permissions: {allowedSources:[],allowExternalLookup:false}
+    context: fixtures[intent],
+    permissions: {allowedSources:["price-history","host-recorded-source"],allowExternalLookup:false}
   };
 
   try {
@@ -73,22 +83,39 @@ for (const intent of intents) {
     if (error) { fail(`${intent}: protocol envelope`, error); continue; }
     ok(`${intent}: protocol envelope`);
 
-    if (intent === "confidence" && ["ok","partial"].includes(body.status)) {
-      const kinds = new Set(["empirical_calibration","prediction_interval","model_reported","evidence_strength","model_disagreement","qualitative_uncertainty","unknown"]);
-      if (!kinds.has(body.data.kind)) fail("confidence: kind declared", "missing or invalid confidence kind");
+    if (intent === "why") {
+      if (!Array.isArray(body.data.reasons) || !["observed","supplied","inferred","unknown"].includes(body.data.basis)) fail("why: basis declared", "reasons array and basis are required");
+      else ok("why: basis declared");
+    }
+
+    if (intent === "evidence") {
+      if (!Array.isArray(body.data.items) || !Array.isArray(body.data.gaps) || !Array.isArray(body.data.contradictions)) fail("evidence: structured evidence", "items, gaps, and contradictions arrays required");
+      else if (body.data.items.some(item => !item.source)) fail("evidence: source-addressable", "fixture evidence must include source identifiers");
+      else { ok("evidence: structured evidence"); ok("evidence: source-addressable"); }
+    }
+
+    if (intent === "compare") {
+      if (!Array.isArray(body.data.options) || body.data.options.length < 2 || !Array.isArray(body.data.dimensions)) fail("compare: decision space", "options and dimensions are required");
+      else ok("compare: decision space");
+    }
+
+    if (intent === "challenge") {
+      if (typeof body.data.countercase !== "string" || !Array.isArray(body.data.arguments)) fail("challenge: countercase", "countercase and arguments are required");
+      else ok("challenge: countercase");
+    }
+
+    if (intent === "confidence") {
+      if (!confidenceKinds.has(body.data.kind)) fail("confidence: kind declared", "missing or invalid confidence kind");
       else ok("confidence: kind declared");
-      if (body.data.kind === "empirical_calibration" && !body.data.basis) fail("confidence: calibration basis", "empirical calibration requires basis");
-      else if (body.data.kind === "empirical_calibration") ok("confidence: calibration basis");
+      if (body.data.kind !== "empirical_calibration") fail("confidence: calibration fixture", "fixture should remain empirical_calibration when basis is supplied");
+      else if (!body.data.basis) fail("confidence: calibration basis", "empirical calibration requires basis");
+      else { ok("confidence: calibration fixture"); ok("confidence: calibration basis"); }
     }
 
-    if (intent === "evidence" && ["ok","partial"].includes(body.status)) {
-      if (!Array.isArray(body.data.items) || !Array.isArray(body.data.gaps)) fail("evidence: structured evidence", "items and gaps arrays required");
-      else ok("evidence: structured evidence");
-    }
-
-    if (intent === "provenance" && ["ok","partial"].includes(body.status)) {
-      if (typeof body.data.recorded !== "boolean" || !Array.isArray(body.data.nodes) || !Array.isArray(body.data.edges)) fail("provenance: lineage declaration", "recorded, nodes, and edges required");
-      else ok("provenance: lineage declaration");
+    if (intent === "provenance") {
+      if (typeof body.data.recorded !== "boolean" || !Array.isArray(body.data.nodes) || !Array.isArray(body.data.edges) || !Array.isArray(body.data.unknownSegments)) fail("provenance: lineage declaration", "recorded, nodes, edges, and unknownSegments required");
+      else if (body.data.recorded !== true) fail("provenance: recorded lineage", "host-recorded fixture must remain marked recorded");
+      else { ok("provenance: lineage declaration"); ok("provenance: recorded lineage"); }
     }
   } catch (error) {
     fail(`${intent}: protocol envelope`, error.message);
