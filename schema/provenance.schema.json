@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/provenance.schema.json",
+  "title": "WGD Provenance Data",
+  "type": "object",
+  "required": ["recorded", "nodes", "edges", "unknownSegments"],
+  "additionalProperties": false,
+  "properties": {
+    "recorded": {"type": "boolean"},
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"enum": ["source", "transformation", "model", "tool", "intermediate", "output"]},
+          "label": {"type": "string"},
+          "version": {"type": ["string", "null"]},
+          "timestamp": {"type": ["string", "null"], "format": "date-time"}
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "additionalProperties": false,
+        "properties": {
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "relation": {"type": "string"}
+        }
+      }
+    },
+    "unknownSegments": {"type": "array", "items": {"type": "string"}}
+  }
+}
