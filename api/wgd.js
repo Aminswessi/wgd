@@ -1,89 +1,161 @@
+const VERSION = "0.1";
 const INTENTS = new Set(["why", "evidence", "compare", "challenge", "confidence", "provenance"]);
+
+const CAPABILITIES = {
+  wgdVersion: VERSION,
+  resolver: "wgd-public-demo",
+  intents: {
+    why: { supported: true },
+    evidence: { supported: true, sourceBacked: true },
+    compare: { supported: true },
+    challenge: { supported: true },
+    confidence: { supported: true, modes: ["empirical_calibration", "qualitative_uncertainty"] },
+    provenance: { supported: true, depth: "source-transform-output" }
+  }
+};
 
 function setHeaders(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Cache-Control", "no-store");
 }
 
+function validObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value);
+}
+
 function validRequest(body) {
-  return body &&
-    body.version === "1" &&
-    typeof body.requestId === "string" &&
+  return validObject(body) &&
+    body.version === VERSION &&
+    typeof body.requestId === "string" && body.requestId.length > 0 &&
     INTENTS.has(body.intent) &&
-    body.context &&
-    typeof body.context === "object" &&
-    !Array.isArray(body.context);
+    validObject(body.context) &&
+    (!body.permissions || validObject(body.permissions));
+}
+
+function base(body, status, title, summary, data, caveats = []) {
+  return {
+    version: VERSION,
+    requestId: body.requestId,
+    intent: body.intent,
+    status,
+    title: title || body.subject?.label || body.intent,
+    summary,
+    data,
+    caveats
+  };
 }
 
 function reason(body) {
   const context = body.context || {};
-  const facts = context.facts || {};
-  const reasons = [];
+  const facts = validObject(context.facts) ? context.facts : {};
 
   switch (body.intent) {
-    case "evidence":
+    case "evidence": {
+      const items = [];
+      const gaps = [];
       if (Array.isArray(facts.observedRange)) {
-        reasons.push({ label: "support", detail: `Observed range: $${facts.observedRange[0]}–$${facts.observedRange[1]}.` });
+        items.push({
+          id: "observed-range",
+          claim: `Observed retailer range: $${facts.observedRange[0]}–$${facts.observedRange[1]}.`,
+          source: "price-history",
+          strength: "direct",
+          direction: "supports"
+        });
       }
       if (facts.currentPrice != null) {
-        reasons.push({ label: "current", detail: `Current price: $${facts.currentPrice}.` });
+        items.push({
+          id: "current-price",
+          claim: `Current price: $${facts.currentPrice}.`,
+          source: "price-history",
+          strength: "direct",
+          direction: "supports"
+        });
       }
-      if (facts.marketplacesIncluded === false) {
-        reasons.push({ label: "gap", detail: "Third-party marketplaces were not included." });
-      }
-      break;
+      if (facts.marketplacesIncluded === false) gaps.push("Third-party marketplaces were not included.");
+      return base(body, items.length ? (gaps.length ? "partial" : "ok") : "insufficient_context", null,
+        items.length ? "Evidence is limited to host-supplied price history." : "No source-backed evidence was supplied.",
+        { items, gaps, contradictions: [] });
+    }
 
     case "compare": {
       const options = Array.isArray(context.options) ? context.options : [];
-      if (options.length >= 2) {
-        reasons.push({ label: "options", detail: `Comparing ${options.map((option) => option.name || "option").join(" vs ")}.` });
-      }
-      if (Array.isArray(context.criteria)) {
-        reasons.push({ label: "criteria", detail: `Criteria: ${context.criteria.join(", ")}.` });
-      }
-      break;
+      const dimensions = Array.isArray(context.criteria) ? context.criteria : [];
+      if (options.length < 2) return base(body, "insufficient_context", null, "At least two options are required.", { options, dimensions, tradeoffs: [], missing: ["second option"] });
+      return base(body, "ok", null, "Comparison uses only host-supplied options and criteria.", { options, dimensions, tradeoffs: [], missing: [] });
     }
 
-    case "why":
-      if (facts.dimensionsFit === true) reasons.push({ label: "fit", detail: "The supplied dimensions fit." });
-      if (facts.price != null && facts.budget != null) reasons.push({ label: "budget", detail: `$${facts.price} is within the supplied $${facts.budget} budget.` });
-      if (Array.isArray(context.signals) && context.signals.length) reasons.push({ label: "signal", detail: `${context.signals.length} host-supplied preference signal(s) contributed.` });
-      break;
+    case "why": {
+      const reasons = [];
+      if (facts.dimensionsFit === true) reasons.push({ label: "fit", detail: "The supplied dimensions fit.", basis: "supplied" });
+      if (facts.price != null && facts.budget != null) reasons.push({ label: "budget", detail: `$${facts.price} is within the supplied $${facts.budget} budget.`, basis: "supplied" });
+      if (Array.isArray(context.signals) && context.signals.length) reasons.push({ label: "signals", detail: `${context.signals.length} host-supplied preference signal(s) contributed.`, basis: "supplied" });
+      return base(body, reasons.length ? "ok" : "insufficient_context", null,
+        reasons.length ? "These are host-supplied reasons, not reconstructed hidden rationale." : "No explicit rationale was supplied.",
+        { reasons, basis: reasons.length ? "supplied" : "unknown", unknowns: reasons.length ? [] : ["underlying rationale"] });
+    }
 
-    case "challenge":
-      if (facts.supportSentiment === "healthy") reasons.push({ label: "countercase", detail: "Support sentiment remains healthy." });
-      if (facts.cancellationRequest === false) reasons.push({ label: "countercase", detail: "There is no cancellation request." });
-      if (reasons.length) reasons.push({ label: "alternative", detail: "Delay escalation until another negative signal appears." });
-      break;
+    case "challenge": {
+      const args = [];
+      if (facts.supportSentiment === "healthy") args.push("Support sentiment remains healthy.");
+      if (facts.cancellationRequest === false) args.push("There is no cancellation request.");
+      if (!args.length) return base(body, "insufficient_context", null, "No counterevidence was supplied.", { countercase: null, arguments: [], strengtheners: [], weaknesses: ["insufficient context"] });
+      return base(body, "ok", null, "The strongest reasonable countercase uses only supplied counterevidence.", {
+        countercase: "Delay escalation until another negative signal appears.",
+        arguments: args,
+        strengtheners: ["Additional positive usage or renewal signals"],
+        weaknesses: ["A new cancellation or material usage decline would weaken this countercase"]
+      });
+    }
 
-    case "confidence":
-      if (context.calibration && context.calibration.confidence != null) {
-        reasons.push({ label: "calibrated", detail: `Host-supplied calibrated confidence: ${Math.round(context.calibration.confidence * 100)}%.` });
+    case "confidence": {
+      if (validObject(context.calibration) && typeof context.calibration.confidence === "number") {
+        const basis = context.calibration.basis || null;
+        return base(body, basis ? "ok" : "partial", null,
+          basis ? "Host supplied an empirically calibrated confidence value and its basis." : "A numeric confidence was supplied without calibration evidence.",
+          {
+            kind: basis ? "empirical_calibration" : "model_reported",
+            value: context.calibration.confidence,
+            basis,
+            interval: context.calibration.interval || null,
+            limitations: basis ? [] : ["Calibration basis not supplied"]
+          },
+          basis ? [] : ["Numeric confidence must not be interpreted as empirically calibrated."]
+        );
       }
-      if (Array.isArray(context.knowns) && context.knowns.length) reasons.push({ label: "knowns", detail: `${context.knowns.join(", ")}.` });
-      if (Array.isArray(context.unknowns) && context.unknowns.length) reasons.push({ label: "unknowns", detail: `${context.unknowns.join(", ")}.` });
-      break;
+      const knowns = Array.isArray(context.knowns) ? context.knowns : [];
+      const unknowns = Array.isArray(context.unknowns) ? context.unknowns : [];
+      return base(body, knowns.length || unknowns.length ? "partial" : "unknown", null,
+        "No calibrated probability is available.",
+        { kind: "qualitative_uncertainty", value: null, basis: null, knowns, unknowns, limitations: ["No calibration data supplied"] });
+    }
 
-    case "provenance":
-      if (context.origin) reasons.push({ label: "origin", detail: String(context.origin) });
-      if (Array.isArray(context.inputs) && context.inputs.length) reasons.push({ label: "inputs", detail: `${context.inputs.join(", ")}.` });
-      if (Array.isArray(context.unknowns) && context.unknowns.length) reasons.push({ label: "unknown", detail: `${context.unknowns.join(", ")}.` });
-      break;
+    case "provenance": {
+      const nodes = [];
+      const edges = [];
+      if (context.origin) nodes.push({ id: "origin", type: "source", label: String(context.origin), recorded: true });
+      if (Array.isArray(context.inputs)) context.inputs.forEach((input, index) => nodes.push({ id: `input-${index}`, type: "input", label: String(input), recorded: true }));
+      if (nodes.length > 1) nodes.slice(1).forEach(node => edges.push({ from: node.id, to: "output", relation: "contributed_to" }));
+      if (nodes.length) nodes.push({ id: "output", type: "output", label: body.subject?.label || "output", recorded: true });
+      const unknownSegments = Array.isArray(context.unknowns) ? context.unknowns.map(String) : [];
+      return base(body, nodes.length ? (unknownSegments.length ? "partial" : "ok") : "unknown", null,
+        nodes.length ? "Provenance reflects recorded host-supplied lineage only." : "No recorded lineage was supplied.",
+        { nodes, edges, recorded: nodes.length > 0, unknownSegments });
+    }
   }
+}
 
+function errorResponse(body, code, message) {
   return {
-    version: "1",
-    requestId: body.requestId,
-    intent: body.intent,
-    status: reasons.length ? "ok" : "insufficient_context",
-    title: body.subject?.label || body.intent,
-    reasons,
-    meta: {
-      generatedAt: new Date().toISOString(),
-      provider: "wgd-public-demo"
-    }
+    version: VERSION,
+    requestId: body?.requestId || "unknown",
+    intent: INTENTS.has(body?.intent) ? body.intent : "why",
+    status: "error",
+    title: "WGD protocol error",
+    summary: message,
+    data: { error: { code, message } },
+    caveats: []
   };
 }
 
@@ -91,25 +163,19 @@ export default async function handler(req, res) {
   setHeaders(res);
 
   if (req.method === "OPTIONS") return res.status(204).end();
-  if (req.method === "GET") return res.status(200).json({ ok: true, service: "wgd-demo-gateway", version: "1" });
+  if (req.method === "GET") return res.status(200).json(CAPABILITIES);
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
+  if (req.body?.version !== VERSION) {
+    return res.status(400).json(errorResponse(req.body, "UNSUPPORTED_VERSION", `Expected WGD Protocol ${VERSION}`));
+  }
+
   if (!validRequest(req.body)) {
-    return res.status(400).json({
-      version: "1",
-      requestId: req.body?.requestId || "unknown",
-      status: "error",
-      error: { code: "INVALID_REQUEST", message: "Invalid WGD request" }
-    });
+    return res.status(400).json(errorResponse(req.body, "INVALID_REQUEST", "Invalid WGD Protocol v0.1 request"));
   }
 
   if (Buffer.byteLength(JSON.stringify(req.body.context), "utf8") > 24000) {
-    return res.status(413).json({
-      version: "1",
-      requestId: req.body.requestId,
-      status: "error",
-      error: { code: "INVALID_REQUEST", message: "Context too large" }
-    });
+    return res.status(413).json(errorResponse(req.body, "CONTEXT_TOO_LARGE", "Context exceeds the 24 KB demo gateway limit"));
   }
 
   return res.status(200).json(reason(req.body));
