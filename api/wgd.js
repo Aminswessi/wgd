@@ -76,9 +76,12 @@ function deterministic(body) {
       const nodes = [], edges = [];
       if (context.origin) nodes.push({ id: "origin", kind: "source", label: String(context.origin) });
       if (Array.isArray(context.inputs)) context.inputs.forEach((input, index) => nodes.push({ id: `input-${index}`, kind: "source", label: String(input) }));
-      if (nodes.length) { nodes.forEach(node => edges.push({ from: node.id, to: "output", relation: "contributed_to" })); nodes.push({ id: "output", kind: "output", label: body.subject?.label || "output" }); }
+      if (nodes.length) {
+        nodes.forEach(node => edges.push({ from: node.id, to: "output", relation: "contributed_to" }));
+        nodes.push({ id: "output", kind: "output", label: String(context.outputLabel || "Recommendation") });
+      }
       const unknownSegments = Array.isArray(context.unknowns) ? context.unknowns.map(String) : [];
-      return base(body, nodes.length ? (unknownSegments.length ? "partial" : "ok") : "unknown", null, nodes.length ? "Provenance reflects recorded host-supplied lineage only." : "No recorded lineage was supplied.", { nodes, edges, recorded: nodes.length > 0, unknownSegments });
+      return base(body, nodes.length ? (unknownSegments.length ? "partial" : "ok") : "unknown", "Recommendation provenance", nodes.length ? "Provenance reflects recorded host-supplied lineage only." : "No recorded lineage was supplied.", { nodes, edges, recorded: nodes.length > 0, unknownSegments });
     }
   }
 }
