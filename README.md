@@ -2,21 +2,40 @@
 
 **Give the web new verbs.**
 
-WGD adds small reasoning affordances to existing UI: **Why, Evidence, Compare, Challenge, Confidence, and Provenance.** Keep your product, model, and backend. Add a reasoning interface.
+WGD is an open interaction protocol and interface layer for reasoning over application state. It attaches six reasoning intents to existing product objects:
 
-> Current release: `0.12.0-alpha.2`
+**Why · Evidence · Compare · Challenge · Confidence · Provenance**
 
-## Try it in 5 minutes
+Keep your product. Keep your model. Keep your backend. Add a reasoning interface.
 
-### React
+> Package release: `0.12.0-alpha.3`  
+> Protocol: `WGD Protocol v0.1`
 
-Install the current alpha:
+## The protocol is the product contract
+
+The React component is optional. WGD Protocol v0.1 defines the stable boundary:
+
+```text
+existing UI object
+      ↓
+reasoning intent + explicit context + permissions
+      ↓
+WGD-compatible resolver
+      ↓
+structured, truth-aware response
+```
+
+Read the normative spec: [`WGD_PROTOCOL.md`](./WGD_PROTOCOL.md)
+
+Machine-readable schemas live in [`/schema`](./schema).
+
+A resolver can be implemented in any language or framework. It does not need the official WGD UI packages.
+
+## Five-minute React integration
 
 ```bash
 npm install @wgd-ai/react@alpha
 ```
-
-Import the component and styles:
 
 ```tsx
 import { Wgd } from "@wgd-ai/react";
@@ -24,17 +43,26 @@ import "@wgd-ai/core/style.css";
 
 const config = {
   resolver: async (request) => ({
-    version: "1",
+    version: "0.1",
     requestId: request.requestId,
     intent: request.intent,
     status: "ok",
-    title: "Show the evidence",
-    reasons: [
-      {
-        label: "support",
-        detail: "Your host application supplied this evidence."
-      }
-    ]
+    title: "Evidence",
+    summary: "The host supplied one source-backed observation.",
+    data: {
+      items: [
+        {
+          id: "price-history-1",
+          claim: "Observed price history supports the claim.",
+          source: "price-history",
+          strength: "direct",
+          direction: "supports"
+        }
+      ],
+      gaps: [],
+      contradictions: []
+    },
+    caveats: []
   })
 };
 
@@ -44,6 +72,7 @@ export function PriceClaim() {
       intent="evidence"
       label="Show the evidence"
       context={{ claim: "Lowest price in 60 days" }}
+      permissions={{ allowedSources: ["price-history"], allowExternalLookup: false }}
       config={config}
     >
       <strong>Lowest price in 60 days</strong>
@@ -52,55 +81,118 @@ export function PriceClaim() {
 }
 ```
 
-That is a complete local integration. No API key is required and nothing is transmitted unless you configure a resolver or endpoint.
+Nothing is transmitted unless the host configures a resolver or endpoint.
 
-**Live external install proof:** https://wgd-react-install-proof.vercel.app
-
-### Connect it to your AI/backend
-
-Replace the local resolver with your server endpoint:
-
-```tsx
-const config = {
-  endpoint: "/api/wgd"
-};
-```
-
-WGD sends a small structured request containing the intent, subject, and **explicit context you provide**. Your server can route that request to OpenAI, Anthropic, Gemini, an internal model, deterministic business logic, or any other reasoning system.
+## Request envelope
 
 ```json
 {
-  "version": "1",
-  "requestId": "...",
+  "version": "0.1",
+  "requestId": "req_123",
   "intent": "evidence",
-  "subject": { "label": "Show the evidence" },
-  "context": { "claim": "Lowest price in 60 days" }
+  "subject": {
+    "id": "claim-42",
+    "type": "claim",
+    "label": "Lowest price in 60 days"
+  },
+  "context": {
+    "claim": "Lowest price in 60 days"
+  },
+  "permissions": {
+    "allowedSources": ["price-history"],
+    "allowExternalLookup": false
+  }
 }
 ```
 
-Your endpoint returns:
+## Response envelope
 
 ```json
 {
-  "version": "1",
-  "requestId": "...",
+  "version": "0.1",
+  "requestId": "req_123",
   "intent": "evidence",
   "status": "ok",
-  "title": "Show the evidence",
-  "reasons": [
-    { "label": "support", "detail": "Observed price history supports the claim." }
-  ]
+  "title": "Evidence",
+  "summary": "Observed retailer history supports the claim.",
+  "data": {
+    "items": [],
+    "gaps": [],
+    "contradictions": []
+  },
+  "caveats": []
 }
 ```
 
-## Vanilla HTML
+Valid statuses are:
 
-No React required:
+`ok · partial · insufficient_context · unsupported · unknown · error`
+
+**Unknown is a valid result. Fabrication is not.**
+
+## The six intents
+
+| Intent | Contract |
+|---|---|
+| **Why** | Explain known or inferred reasons while declaring the basis. |
+| **Evidence** | Return source-addressable support, contradictions, and gaps. |
+| **Compare** | Preserve options, criteria, missing dimensions, and tradeoffs. |
+| **Challenge** | Produce the strongest reasonable countercase to the conclusion. |
+| **Confidence** | Declare what kind of uncertainty is being represented; never fake calibration. |
+| **Provenance** | Distinguish recorded lineage from inferred narrative and unknown segments. |
+
+## Truth is part of the protocol
+
+A WGD-compatible resolver must not:
+
+- invent hidden model rationale;
+- manufacture evidence or citations;
+- claim provenance that was not recorded or supplied;
+- present model self-confidence as empirical calibration;
+- silently pull hidden application context;
+- return arbitrary executable HTML as reasoning output.
+
+See [`WGD_PROTOCOL.md`](./WGD_PROTOCOL.md) for normative rules.
+
+## Capability discovery
+
+A resolver SHOULD answer `GET` with a capability manifest:
+
+```json
+{
+  "wgdVersion": "0.1",
+  "resolver": "risk-gateway",
+  "intents": {
+    "why": {"supported": true},
+    "evidence": {"supported": true, "sourceBacked": true},
+    "compare": {"supported": true},
+    "challenge": {"supported": true},
+    "confidence": {"supported": true, "modes": ["empirical_calibration"]},
+    "provenance": {"supported": true, "depth": "source-transform-model-output"}
+  }
+}
+```
+
+Hosts should not offer an intent the resolver cannot truthfully support.
+
+## Conformance
+
+The repo now includes a protocol conformance CLI:
+
+```bash
+node packages/conformance/cli.mjs https://your-app.example/api/wgd
+```
+
+The package is staged as `@wgd-ai/conformance` and checks capability discovery, envelope preservation, all six intent fixtures, Evidence sourcing, Why basis, Confidence calibration semantics, Provenance lineage, and unsupported-version rejection.
+
+Passing the CLI is necessary, but semantic truthfulness still depends on the resolver accurately representing the system it fronts.
+
+## Vanilla HTML
 
 ```html
 <script>
   window.WGD_CONFIG = {
-    endpoint: "https://wgd-dev-alpha.vercel.app/api/wgd"
+    endpoint: "https://your-app.example/api/wgd"
   };
 </script>
 <script src="https://wgd-dev-alpha.vercel.app/wgd.js" defer></script>
@@ -108,29 +200,12 @@ No React required:
 <span
   data-wgd="evidence"
   data-wgd-label="Show the evidence"
-  data-wgd-context='{"claim":"Lowest price in 60 days","facts":{"currentPrice":135.75}}'>
+  data-wgd-type="claim"
+  data-wgd-context='{"facts":{"currentPrice":135.75,"observedRange":[141,168]}}'
+  data-wgd-permissions='{"allowedSources":["price-history"],"allowExternalLookup":false}'>
   Lowest price in 60 days
 </span>
 ```
-
-See `examples/basic.html` for the complete copy-paste example.
-
-## The six primitives
-
-| Primitive | Use it when someone needs to… |
-|---|---|
-| **Why** | understand why something appeared, changed, or was recommended |
-| **Evidence** | inspect supporting facts, sources, and gaps |
-| **Compare** | evaluate alternatives and tradeoffs |
-| **Challenge** | see the strongest reasonable countercase |
-| **Confidence** | distinguish certainty, inference, and unknowns |
-| **Provenance** | inspect origin, inputs, and transformations |
-
-## One rule
-
-**WGD should not invent an explanation for a system that cannot support it.** Hosts supply the context. WGD supplies the interaction contract and interface.
-
-WGD does not scrape arbitrary DOM, does not require a browser-side model key, and ships no telemetry by default.
 
 ## Packages
 
@@ -140,23 +215,24 @@ npm install @wgd-ai/core@alpha
 npm install @wgd-ai/icons@alpha
 ```
 
-- `@wgd-ai/core` — provider-neutral contracts and resolver runtime
+- `@wgd-ai/core` — protocol types and provider-neutral resolver runtime
 - `@wgd-ai/react` — React reasoning affordances
-- `@wgd-ai/icons` — self-contained React icons
+- `@wgd-ai/icons` — self-contained primitive icons
+- `@wgd-ai/conformance` — protocol conformance checks (staged in repo)
 
-## Examples and source
+## Reference implementation
 
-- `examples/react-install-proof` — fresh Vite app consuming WGD from npm
-- `examples/basic.html` — vanilla copy-paste integration
-- `packages/core` — request/response contract and runtime
-- `packages/react` — React component
-- `packages/icons` — icon package
+- `examples/protocol-v0.1/decision.json` — one decision object for all six intents
+- `examples/basic.html` — vanilla integration
+- `examples/react-install-proof` — external npm consumer proof
+- `api/wgd.js` — deterministic public demo resolver
+- `schema/` — JSON Schemas
 
-Public demo: https://wgd-dev-alpha.vercel.app
+## What v0.1 deliberately does not do
 
-## Status
+No arbitrary custom verbs. No agent orchestration. No tool execution. No hidden context discovery. No standardized streaming. No memory layer.
 
-`0.12 alpha` — the interaction and integration contract is intentionally small and still being hardened through real integrations.
+First make six semantics exceptionally difficult to misunderstand.
 
 ## License
 
