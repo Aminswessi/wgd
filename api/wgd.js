@@ -56,22 +56,10 @@ function reason(body) {
       const items = [];
       const gaps = [];
       if (Array.isArray(facts.observedRange)) {
-        items.push({
-          id: "observed-range",
-          claim: `Observed retailer range: $${facts.observedRange[0]}–$${facts.observedRange[1]}.`,
-          source: "price-history",
-          strength: "direct",
-          direction: "supports"
-        });
+        items.push({ id: "observed-range", claim: `Observed retailer range: $${facts.observedRange[0]}–$${facts.observedRange[1]}.`, source: "price-history", strength: "direct", direction: "supports" });
       }
       if (facts.currentPrice != null) {
-        items.push({
-          id: "current-price",
-          claim: `Current price: $${facts.currentPrice}.`,
-          source: "price-history",
-          strength: "direct",
-          direction: "supports"
-        });
+        items.push({ id: "current-price", claim: `Current price: $${facts.currentPrice}.`, source: "price-history", strength: "direct", direction: "supports" });
       }
       if (facts.marketplacesIncluded === false) gaps.push("Third-party marketplaces were not included.");
       return base(body, items.length ? (gaps.length ? "partial" : "ok") : "insufficient_context", null,
@@ -134,10 +122,12 @@ function reason(body) {
     case "provenance": {
       const nodes = [];
       const edges = [];
-      if (context.origin) nodes.push({ id: "origin", type: "source", label: String(context.origin), recorded: true });
-      if (Array.isArray(context.inputs)) context.inputs.forEach((input, index) => nodes.push({ id: `input-${index}`, type: "input", label: String(input), recorded: true }));
-      if (nodes.length > 1) nodes.slice(1).forEach(node => edges.push({ from: node.id, to: "output", relation: "contributed_to" }));
-      if (nodes.length) nodes.push({ id: "output", type: "output", label: body.subject?.label || "output", recorded: true });
+      if (context.origin) nodes.push({ id: "origin", kind: "source", label: String(context.origin) });
+      if (Array.isArray(context.inputs)) context.inputs.forEach((input, index) => nodes.push({ id: `input-${index}`, kind: "source", label: String(input) }));
+      if (nodes.length) {
+        nodes.forEach(node => edges.push({ from: node.id, to: "output", relation: "contributed_to" }));
+        nodes.push({ id: "output", kind: "output", label: body.subject?.label || "output" });
+      }
       const unknownSegments = Array.isArray(context.unknowns) ? context.unknowns.map(String) : [];
       return base(body, nodes.length ? (unknownSegments.length ? "partial" : "ok") : "unknown", null,
         nodes.length ? "Provenance reflects recorded host-supplied lineage only." : "No recorded lineage was supplied.",
@@ -161,22 +151,11 @@ function errorResponse(body, code, message) {
 
 export default async function handler(req, res) {
   setHeaders(res);
-
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method === "GET") return res.status(200).json(CAPABILITIES);
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-
-  if (req.body?.version !== VERSION) {
-    return res.status(400).json(errorResponse(req.body, "UNSUPPORTED_VERSION", `Expected WGD Protocol ${VERSION}`));
-  }
-
-  if (!validRequest(req.body)) {
-    return res.status(400).json(errorResponse(req.body, "INVALID_REQUEST", "Invalid WGD Protocol v0.1 request"));
-  }
-
-  if (Buffer.byteLength(JSON.stringify(req.body.context), "utf8") > 24000) {
-    return res.status(413).json(errorResponse(req.body, "CONTEXT_TOO_LARGE", "Context exceeds the 24 KB demo gateway limit"));
-  }
-
+  if (req.body?.version !== VERSION) return res.status(400).json(errorResponse(req.body, "UNSUPPORTED_VERSION", `Expected WGD Protocol ${VERSION}`));
+  if (!validRequest(req.body)) return res.status(400).json(errorResponse(req.body, "INVALID_REQUEST", "Invalid WGD Protocol v0.1 request"));
+  if (Buffer.byteLength(JSON.stringify(req.body.context), "utf8") > 24000) return res.status(413).json(errorResponse(req.body, "CONTEXT_TOO_LARGE", "Context exceeds the 24 KB demo gateway limit"));
   return res.status(200).json(reason(req.body));
 }
