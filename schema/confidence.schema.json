@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wgd.ai/schema/confidence.schema.json",
+  "title": "WGD Confidence Data",
+  "type": "object",
+  "required": ["kind"],
+  "additionalProperties": false,
+  "properties": {
+    "kind": {"enum": ["empirical_calibration", "prediction_interval", "model_reported", "evidence_strength", "model_disagreement", "qualitative_uncertainty", "unknown"]},
+    "value": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "basis": {"type": ["string", "null"]},
+    "interval": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["lower", "upper"],
+      "properties": {
+        "lower": {"type": "number"},
+        "upper": {"type": "number"},
+        "level": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}
