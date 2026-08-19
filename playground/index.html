@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WGD Playground — Protocol v0.1</title>
+<style>
+:root{--bg:#f7f8fa;--panel:#fff;--ink:#202124;--muted:#6f7479;--line:#dfe3e8;--soft:#f1f3f4;--blue:#4285f4;--purple:#8b5cf6;--green:#188038;--red:#b3261e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Arial,sans-serif}.shell{max-width:1440px;margin:auto;padding:28px}.top{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:22px}.eyebrow{font:11px ui-monospace,SFMono-Regular,monospace;letter-spacing:.08em;color:#777;text-transform:uppercase}.top h1{font-size:38px;line-height:1;margin:8px 0 9px}.top p{margin:0;color:var(--muted);max-width:760px;line-height:1.55}.badge{font:11px ui-monospace,monospace;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;white-space:nowrap}.grid{display:grid;grid-template-columns:minmax(340px,.92fr) minmax(420px,1.08fr);gap:18px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.ph{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}.ph strong{font-size:14px}.body{padding:17px}.verbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:17px}.verb{min-height:46px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-weight:650;color:#4b5055}.verb.active{border-color:#7a69f5;background:linear-gradient(135deg,rgba(66,133,244,.08),rgba(139,92,246,.10));color:#2b2e33;box-shadow:inset 0 0 0 1px rgba(122,105,245,.16)}label{display:block;font:11px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:#7a7f84;margin:15px 0 7px}input,textarea{width:100%;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);padding:11px 12px;font:13px ui-monospace,SFMono-Regular,monospace;outline:none}input:focus,textarea:focus{border-color:#8a78f6;box-shadow:0 0 0 3px rgba(139,92,246,.09)}textarea{min-height:280px;resize:vertical;line-height:1.48}.actions{display:flex;gap:9px;margin-top:13px}.run{flex:1;border:0;border-radius:6px;padding:13px 16px;color:#fff;font-weight:750;cursor:pointer;background:linear-gradient(135deg,var(--blue),var(--purple))}.secondary{border:1px solid var(--line);background:#fff;border-radius:6px;padding:11px 14px;cursor:pointer}.status{font:11px ui-monospace,monospace;color:var(--muted)}.status.good{color:var(--green)}.status.bad{color:var(--red)}.result-empty{min-height:400px;display:grid;place-items:center;text-align:center;color:#9aa0a6;padding:50px}.result{display:none}.summary{padding:18px;border:1px solid #e3e6ea;border-radius:7px;background:#fbfcfd;margin-bottom:14px}.summary h2{font-size:22px;margin:0 0 8px}.summary p{font-size:15px;line-height:1.55;margin:0;color:#4e5358}.pill{display:inline-block;font:10px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;padding:5px 7px;border-radius:999px;background:#edf3ff;color:#315ea8;margin-bottom:10px}.section{border-top:1px solid var(--line);padding:15px 0}.section:first-of-type{border-top:0}.section h3{font:11px ui-monospace,monospace;text-transform:uppercase;color:#858a90;letter-spacing:.06em;margin:0 0 9px}.item{padding:10px 12px;border:1px solid #e5e8ec;border-radius:6px;margin:8px 0;background:#fff;line-height:1.45;font-size:14px}.item small{display:block;color:#858a90;margin-top:5px}.raw-wrap{margin-top:18px;border-top:1px solid var(--line)}details{padding:0 17px 17px}summary{cursor:pointer;font:11px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:#73787d;padding-top:15px}pre{white-space:pre-wrap;word-break:break-word;background:#111418;color:#d7e0e8;border-radius:7px;padding:14px;font:12px/1.5 ui-monospace,SFMono-Regular,monospace;max-height:360px;overflow:auto}.note{margin-top:16px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:7px;color:#666;font-size:12px;line-height:1.5}@media(max-width:900px){.grid{grid-template-columns:1fr}.verbs{grid-template-columns:repeat(2,1fr)}.top{flex-direction:column}.shell{padding:16px}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="top">
+    <div><div class="eyebrow">WGD Playground · Protocol v0.1</div><h1>Give the web new verbs.</h1><p>Test the six WGD intents against the public reference resolver, or point the playground at your own WGD-compatible endpoint.</p></div>
+    <div class="badge" id="engineBadge">checking resolver…</div>
+  </div>
+  <div class="grid">
+    <section class="panel">
+      <div class="ph"><strong>Request</strong><span class="status" id="requestStatus">ready</span></div>
+      <div class="body">
+        <div class="verbs" id="verbs"></div>
+        <label for="endpoint">Resolver endpoint</label>
+        <input id="endpoint" value="https://wgd-dev-alpha.vercel.app/api/wgd" />
+        <label for="subject">Subject label</label>
+        <input id="subject" value="Should we renew this customer now?" />
+        <label for="context">Context JSON</label>
+        <textarea id="context"></textarea>
+        <div class="actions"><button class="run" id="run">Run Challenge</button><button class="secondary" id="reset">Reset preset</button></div>
+        <div class="note">The public endpoint is a demo/reference resolver. Production WGD integrations should use a host-owned resolver and the host's own model/API credentials.</div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="ph"><strong>Response</strong><span class="status" id="responseStatus">waiting</span></div>
+      <div class="body">
+        <div class="result-empty" id="empty"><div><div style="font-size:28px;margin-bottom:10px">✦</div>Choose a verb and run the request.</div></div>
+        <div class="result" id="result"></div>
+      </div>
+      <div class="raw-wrap"><details><summary>Raw Protocol Response</summary><pre id="raw">No response yet.</pre></details></div>
+    </section>
+  </div>
+</main>
+<script>
+const intents=["why","evidence","compare","challenge","confidence","provenance"];
+const labels={why:"Why",evidence:"Evidence",compare:"Compare",challenge:"Challenge",confidence:"Confidence",provenance:"Provenance"};
+const presets={
+why:{subject:"Why is Plan B recommended?",context:{facts:{monthlyCostA:79,monthlyCostB:59,teamSize:14},signals:["lower cost","fits team size"],decision:"Recommend Plan B over Plan A"}},
+evidence:{subject:"Lowest price in 60 days",context:{sources:[{id:"price-history",label:"60-day retailer price history"}],facts:{currentPrice:135.75,observedRange:[141,168],marketplacesIncluded:false},claim:"This is the lowest price in 60 days"}},
+compare:{subject:"Compare Plan A and Plan B",context:{options:[{name:"Plan A",price:79,seats:10},{name:"Plan B",price:59,seats:15}],criteria:["price","seat capacity","fit for a 14-person team"]}},
+challenge:{subject:"Should we escalate this customer as a churn risk?",context:{decision:"Escalate customer as churn risk",facts:{usageChange:"down 18% month over month",supportSentiment:"healthy",cancellationRequest:false,renewalDate:"in 90 days"}}},
+confidence:{subject:"How certain are we about this recommendation?",context:{knowns:["usage is down 18%","support sentiment is healthy","no cancellation request exists"],unknowns:["budget approval","competitor discussions","executive sponsor intent"]}},
+provenance:{subject:"Where did this recommendation come from?",context:{origin:"customer-health-dashboard",inputs:["usage-metrics","support-sentiment","renewal-record"],unknowns:["offline sales conversations"]}}
+};
+let current="challenge";
+const verbs=document.getElementById("verbs"),contextEl=document.getElementById("context"),subjectEl=document.getElementById("subject"),endpointEl=document.getElementById("endpoint"),runBtn=document.getElementById("run"),raw=document.getElementById("raw"),result=document.getElementById("result"),empty=document.getElementById("empty"),requestStatus=document.getElementById("requestStatus"),responseStatus=document.getElementById("responseStatus"),engineBadge=document.getElementById("engineBadge");
+function renderVerbs(){verbs.innerHTML="";for(const intent of intents){const b=document.createElement("button");b.className="verb"+(intent===current?" active":"");b.textContent=labels[intent];b.onclick=()=>{current=intent;loadPreset();renderVerbs()};verbs.appendChild(b)}}
+function loadPreset(){subjectEl.value=presets[current].subject;contextEl.value=JSON.stringify(presets[current].context,null,2);runBtn.textContent=`Run ${labels[current]}`;requestStatus.textContent="ready";requestStatus.className="status"}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function humanize(key){return key.replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase())}
+function renderValue(key,value){if(Array.isArray(value)){if(!value.length)return `<div class="item" style="color:#999">None</div>`;return value.map(v=>{if(v&&typeof v==="object"){const main=v.claim||v.detail||v.label||v.name||JSON.stringify(v);const meta=Object.entries(v).filter(([k])=>!["claim","detail","label","name"].includes(k)).map(([k,val])=>`${humanize(k)}: ${typeof val==="object"?JSON.stringify(val):val}`).join(" · ");return `<div class="item">${esc(main)}${meta?`<small>${esc(meta)}</small>`:""}</div>`}return `<div class="item">${esc(v)}</div>`}).join("")}if(value&&typeof value==="object")return `<div class="item"><pre style="margin:0;background:#f6f7f8;color:#333;max-height:none">${esc(JSON.stringify(value,null,2))}</pre></div>`;return `<div class="item">${esc(value)}</div>`}
+function renderResult(data){empty.style.display="none";result.style.display="block";const sections=Object.entries(data.data||{}).map(([k,v])=>`<div class="section"><h3>${esc(humanize(k))}</h3>${renderValue(k,v)}</div>`).join("");result.innerHTML=`<div class="summary"><div class="pill">${esc(data.intent)} · ${esc(data.status)}</div><h2>${esc(data.title||labels[data.intent])}</h2><p>${esc(data.summary||"")}</p></div>${sections}${(data.caveats||[]).length?`<div class="section"><h3>Caveats</h3>${data.caveats.map(c=>`<div class="item">${esc(c)}</div>`).join("")}</div>`:""}`}
+async function capabilities(){try{const r=await fetch(endpointEl.value);const d=await r.json();engineBadge.textContent=d.demoOnly?`DEMO · ${d.engine||"resolver"} · ${d.model||""}`:`${d.engine||d.resolver||"resolver"}`;engineBadge.title=d.productionRecommendation||""}catch{engineBadge.textContent="resolver unavailable"}}
+async function run(){let ctx;try{ctx=JSON.parse(contextEl.value)}catch{requestStatus.textContent="invalid JSON";requestStatus.className="status bad";return}const body={version:"0.1",requestId:crypto.randomUUID?crypto.randomUUID():`play-${Date.now()}`,intent:current,subject:{id:"playground-subject",type:"claim",label:subjectEl.value},context:ctx,permissions:{allowExternalLookup:false}};requestStatus.textContent="sending";responseStatus.textContent="reasoning…";responseStatus.className="status";runBtn.disabled=true;try{const r=await fetch(endpointEl.value,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});const d=await r.json();raw.textContent=JSON.stringify(d,null,2);renderResult(d);requestStatus.textContent="sent";requestStatus.className="status good";responseStatus.textContent=r.ok?d.status:`HTTP ${r.status}`;responseStatus.className="status "+(r.ok?"good":"bad")}catch(e){raw.textContent=String(e);responseStatus.textContent="request failed";responseStatus.className="status bad"}finally{runBtn.disabled=false}}
+runBtn.onclick=run;document.getElementById("reset").onclick=loadPreset;endpointEl.addEventListener("change",capabilities);renderVerbs();loadPreset();capabilities();
+</script>
+</body>
+</html>
