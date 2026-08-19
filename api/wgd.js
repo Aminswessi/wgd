@@ -6,7 +6,9 @@ const INTENTS = new Set(["why", "evidence", "compare", "challenge", "confidence"
 function capabilities() {
   return {
     wgdVersion: VERSION,
-    resolver: "wgd-public-gateway",
+    resolver: "wgd-public-reference",
+    demoOnly: true,
+    productionRecommendation: "bring-your-own-resolver",
     engine: openAiConfigured() ? "openai" : "deterministic-demo",
     model: openAiConfigured() ? (process.env.WGD_OPENAI_MODEL || "gpt-5.6-luna") : null,
     intents: {
