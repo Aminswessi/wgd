@@ -11,6 +11,23 @@ Keep your product. Keep your model. Keep your backend. Add a reasoning interface
 > Package release: `0.12.0-alpha.3`  
 > Protocol: `WGD Protocol v0.1`
 
+## Live proof
+
+WGD Protocol v0.1 is running publicly now.
+
+- **Resolver:** `https://wgd-dev-alpha.vercel.app/api/wgd`
+- **Independent conformance proof:** `https://wgd-conformance-proof.vercel.app/api/check`
+- **External npm consumer:** `https://wgd-react-install-proof.vercel.app`
+- **Proof record:** [`PROTOCOL_PROOF.md`](./PROTOCOL_PROOF.md)
+
+The live conformance runner currently reports **24 passed · 0 failed · conformant: true** against the production resolver.
+
+Published from GitHub Actions with npm provenance:
+
+- `@wgd-ai/core@0.12.0-alpha.3`
+- `@wgd-ai/icons@0.12.0-alpha.3`
+- `@wgd-ai/react@0.12.0-alpha.3`
+
 ## The protocol is the product contract
 
 The React component is optional. WGD Protocol v0.1 defines the stable boundary:
@@ -177,22 +194,28 @@ Hosts should not offer an intent the resolver cannot truthfully support.
 
 ## Conformance
 
-The repo now includes a protocol conformance CLI:
+Run the repository-local protocol conformance CLI against any resolver:
 
 ```bash
 node packages/conformance/cli.mjs https://your-app.example/api/wgd
 ```
 
-The package is staged as `@wgd-ai/conformance` and checks capability discovery, envelope preservation, all six intent fixtures, Evidence sourcing, Why basis, Confidence calibration semantics, Provenance lineage, and unsupported-version rejection.
+It checks capability discovery, envelope preservation, all six intent fixtures, Evidence sourcing, Why basis, Confidence calibration semantics, Provenance lineage, and unsupported-version rejection.
 
-Passing the CLI is necessary, but semantic truthfulness still depends on the resolver accurately representing the system it fronts.
+The independent public runner executes the same semantic class of checks over HTTP against the production resolver:
+
+`https://wgd-conformance-proof.vercel.app/api/check`
+
+`@wgd-ai/conformance` remains repo-local until the new npm package is separately authorized for trusted publishing. The existing core, icons, and React packages are already published at alpha.3.
+
+Passing conformance is necessary, but semantic truthfulness still depends on the resolver accurately representing the system it fronts.
 
 ## Vanilla HTML
 
 ```html
 <script>
   window.WGD_CONFIG = {
-    endpoint: "https://your-app.example/api/wgd"
+    endpoint: "https://wgd-dev-alpha.vercel.app/api/wgd"
   };
 </script>
 <script src="https://wgd-dev-alpha.vercel.app/wgd.js" defer></script>
@@ -218,13 +241,14 @@ npm install @wgd-ai/icons@alpha
 - `@wgd-ai/core` — protocol types and provider-neutral resolver runtime
 - `@wgd-ai/react` — React reasoning affordances
 - `@wgd-ai/icons` — self-contained primitive icons
-- `@wgd-ai/conformance` — protocol conformance checks (staged in repo)
+- `packages/conformance` — repo-local WGD Protocol v0.1 conformance CLI
 
 ## Reference implementation
 
 - `examples/protocol-v0.1/decision.json` — one decision object for all six intents
 - `examples/basic.html` — vanilla integration
 - `examples/react-install-proof` — external npm consumer proof
+- `examples/conformance-proof/api/check.js` — independent live conformance runner
 - `api/wgd.js` — deterministic public demo resolver
 - `schema/` — JSON Schemas
 
